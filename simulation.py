@@ -82,6 +82,7 @@ class Simulation:
 
         ax.legend()
         anim = animation.FuncAnimation(fig, animate, init_func=init, interval=10, blit=True)
+        anim.save("out.gif")
         plt.show()
 
 
