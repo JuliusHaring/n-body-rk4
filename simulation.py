@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import animation
 from typing import List
 import astropy.units as u 
 import astropy.constants as c 
@@ -48,15 +49,41 @@ class Simulation:
         
         fig = plt.figure()
         ax = fig.gca(projection='3d')
-        for i, body in enumerate(self.bodies):
-            x = self.history[:, 6*i]
-            y = self.history[:, 6*i + 1]
-            z = self.history[:, 6*i + 2]
-            ax.plot(x, y, z, label=body.name + " History")
-            ax.scatter(x[-1], y[-1], z[-1], label=body.name)
+        
+        xmin = min(min(self.history[:, i*6]) for i in range(len(self.bodies)))
+        xmax = max(max(self.history[:, i*6]) for i in range(len(self.bodies)))
+        ax.set_xlim((xmin, xmax))
+
+        ymin = min(min(self.history[:, i*6 + 1]) for i in range(len(self.bodies)))
+        ymax = max(max(self.history[:, i*6 + 1]) for i in range(len(self.bodies)))
+        ax.set_ylim((ymin, ymax))
+
+        zmin = min(min(self.history[:, i*6 + 2]) for i in range(len(self.bodies)))
+        zmax = max(max(self.history[:, i*6 + 2]) for i in range(len(self.bodies)))
+        ax.set_zlim((zmin, zmax))
+
+        lines = [ax.plot([], [], [], lw=3, label=body.name)[0] for body in self.bodies]
+
+        def init():
+            for line in lines:
+                line.set_data([], [])
+                line.set_3d_properties([])
+            return lines
+
+        def animate(i):
+            for idx, line in enumerate(lines):
+                x = self.history[:i, idx*6]
+                y = self.history[:i, idx*6 + 1]
+                z = self.history[:i, idx*6 + 2]
+
+                line.set_data(x, y)
+                line.set_3d_properties(z)
+            return lines
+
         ax.legend()
-        ax.set_title(f"Simulation over {str(self.T)} in timesteps of {str(self.dt)}")
+        anim = animation.FuncAnimation(fig, animate, init_func=init, interval=10, blit=True)
         plt.show()
+
 
         
         
