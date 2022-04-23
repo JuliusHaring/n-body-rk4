@@ -90,23 +90,19 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    M_moon = 7.347e22*u.kg
-    v_moon = np.array([0,1.022,0])*u.km/u.s
-    moon_momentum = M_moon * v_moon
+    a_x = np.array((0,0,0))*u.m
+    a_v = np.array((10000,0,0)) * u.m / u.s
+    ba = Body("A", a_x, a_v, 1*u.Msun)
 
-    moon = Body(mass=M_moon,
-            x_vec = np.array([3.84e5,0,0])*u.km,
-            v_vec = v_moon,
-            name='Moon')
+    b_x = np.array((-149598022960., 0., 0.)) * u.m
+    b_v = np.array((0., -29290., 0.)) * u.m / u.s
+    bb = Body("B", b_x, b_v, 1*u.Mearth)
 
-    v_earth = - (moon_momentum / c.M_earth).to(u.km/u.s)
+    c_x = np.array((-149598022960. - 383397000., 100., 100.)) * u.m
+    c_v = np.array((0., -29290. - 1023., 0.)) * u.m / u.s
+    bc = Body("C", c_x, c_v, 1*u.Mearth / 81.3)
 
-    earth = Body(mass=c.M_earth,
-                x_vec=np.array([0,0,0])*u.km,
-                v_vec=v_earth,
-                name='Earth')
-
-    simulation = Simulation(earth, moon)
+    simulation = Simulation(ba, bb, bc)
     simulation.set_diff_eq(nbody_diff_eqs)
 
-    simulation.run(72*u.day,1*u.hr)
+    simulation.run(2*u.year,1*u.day)
